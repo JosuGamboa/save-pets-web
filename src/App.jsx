@@ -10,6 +10,7 @@ import Blog from './pages/Blog';
 import PlanFree from './pages/PlanFree';
 import PlanPremium from './pages/PlanPremium';
 import Negocios from './pages/Negocios';
+import Inventario from './pages/Inventario';
 
 // Importamos el Layout
 import AdminLayout from './layouts/AdminLayout';
@@ -61,14 +62,17 @@ export default function App() {
           {/* Esto permite que el menú y las pestañas no se recarguen */}
           <Route path="/" element={<AdminLayout toggleTheme={toggleColorMode} currentMode={mode} />}>
             
-            {/* RUTAS HIJAS (Se mostrarán donde pongamos el <Outlet /> en el AdminLayout) */}
-            <Route index element={<Landing />} /> {/* "index" significa que carga en la ruta raíz '/' */}
+            {/* RUTAS HIJAS */}
+            <Route index element={<Landing />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="soporte" element={<Soporte />} />
             <Route path="blog" element={<Blog />} />
             <Route path="plan-free" element={<PlanFree />} />
             <Route path="plan-premium" element={<PlanPremium />} />
             <Route path="negocios" element={<Negocios />} /> 
+            
+            {/* RUTA ACTIVA PARA EL INVENTARIO */}
+            <Route path="productos" element={<Inventario />} />
             
           </Route>
         </Routes>
