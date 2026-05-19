@@ -68,7 +68,7 @@ export default function App() {
             <Route path="blog" element={<Blog />} />
             <Route path="plan-free" element={<PlanFree />} />
             <Route path="plan-premium" element={<PlanPremium />} />
-            <Route path="negocios" element={<Negocios />} /> {/* <-- Añade esta línea */}
+            <Route path="negocios" element={<Negocios />} /> 
             
           </Route>
         </Routes>

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Typography, Box, Grid, Card, CardContent, Divider, LinearProgress, useTheme,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  Chip, Avatar, Button, Stack, IconButton, Snackbar, Alert,
+  Chip, Avatar, Button, Stack, Snackbar, Alert,
   List, ListItem, ListItemIcon, ListItemText, Checkbox
 } from '@mui/material';
 
@@ -10,15 +10,12 @@ import {
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { LineChart } from '@mui/x-charts/LineChart';
-import { BarChart } from '@mui/x-charts/BarChart'; // NUEVO GRÁFICO
+import { BarChart } from '@mui/x-charts/BarChart'; 
 
 // Íconos
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DownloadIcon from '@mui/icons-material/Download';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import StorageIcon from '@mui/icons-material/Storage';
 import DnsIcon from '@mui/icons-material/Dns';
 import CodeIcon from '@mui/icons-material/Code';
@@ -34,6 +31,32 @@ export default function Dashboard() {
     { id: 3, texto: 'Revisar reporte de error en mapa', completada: false },
   ]);
 
+  // --- NUEVO ESTADO PARA DATOS REALES DE LA BASE DE DATOS ---
+  const [usuariosReales, setUsuariosReales] = useState([]);
+  const [cargandoDatos, setCargandoDatos] = useState(true);
+
+  // --- CONEXIÓN AL BACKEND (FastAPI + PostgreSQL) ---
+  useEffect(() => {
+    const fetchUsuarios = async () => {
+      try {
+        // Hacemos un GET a la misma ruta que usó Flutter
+        const response = await fetch('http://localhost:8000/usuarios/');
+        if (response.ok) {
+          const data = await response.json();
+          setUsuariosReales(data); // Guardamos la lista real
+        } else {
+          console.error("Error al obtener datos:", response.status);
+        }
+      } catch (error) {
+        console.error("Error de conexión al servidor de Python:", error);
+      } finally {
+        setCargandoDatos(false);
+      }
+    };
+
+    fetchUsuarios();
+  }, []); // El array vacío significa que esto se ejecuta solo 1 vez al cargar la página
+
   // Funciones interactivas
   const handleExportar = () => setAlertOpen(true);
   
@@ -41,24 +64,16 @@ export default function Dashboard() {
     setTareas(tareas.map(t => t.id === id ? { ...t, completada: !t.completada } : t));
   };
 
-  // --- DATOS PARA GRÁFICOS ---
+  // --- DATOS PARA GRÁFICOS (Mantenidos estáticos por ahora) ---
   const lineChartDataX = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const dataConsultasIA = [60, 85, 45, 100, 70, 120, 90];
   const dataEscaneosCamara = [30, 50, 20, 80, 55, 90, 65];
 
-  // Datos para el nuevo gráfico de barras (Perros vs Gatos)
   const barChartData = [
     { mes: 'Ene', perros: 400, gatos: 250 },
     { mes: 'Feb', perros: 600, gatos: 350 },
     { mes: 'Mar', perros: 800, gatos: 450 },
     { mes: 'Abr', perros: 1200, gatos: 700 },
-  ];
-
-  const actividadReciente = [
-    { id: 'TRX-901', usuario: 'María López', accion: 'Suscripción Premium', monto: '$4.99', estado: 'Completado', tiempo: 'Hace 5 min' },
-    { id: 'TRX-902', usuario: 'Carlos Mendoza', accion: 'Registro Mascota', monto: '$0.00', estado: 'Gratis', tiempo: 'Hace 12 min' },
-    { id: 'TRX-903', usuario: 'Peluquería Canina', accion: 'Suscripción Negocio', monto: '$29.99', estado: 'Pendiente', tiempo: 'Hace 1 hora' },
-    { id: 'TRX-904', usuario: 'Ana Torres', accion: 'Suscripción Premium', monto: '$4.99', estado: 'Completado', tiempo: 'Hace 2 horas' },
   ];
 
   return (
@@ -104,10 +119,13 @@ export default function Dashboard() {
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">Usuarios Activos</Typography>
+                <Typography variant="body2" color="text.secondary">Usuarios Totales (BD Real)</Typography>
                 <InfoOutlinedIcon fontSize="small" color="action" />
               </Box>
-              <Typography variant="h4" fontWeight="bold">8,846</Typography>
+              {/* Aquí mostramos la cantidad REAL de usuarios registrados */}
+              <Typography variant="h4" fontWeight="bold">
+                {cargandoDatos ? '...' : usuariosReales.length}
+              </Typography>
               <Box sx={{ height: 60, mt: 1 }}>
                 <SparkLineChart data={[1, 4, 2, 5, 7, 2, 4, 6, 8, 3, 5]} area colors={[theme.palette.primary.main]} showTooltip />
               </Box>
@@ -152,7 +170,6 @@ export default function Dashboard() {
 
       {/* --- FILA 2: GRÁFICOS PRINCIPALES --- */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        {/* Gráfico de LÍNEAS */}
         <Grid size={{ xs: 12, lg: 8 }}>
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
             <CardContent>
@@ -172,7 +189,6 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Gráfico de PASTEL (Sin Veterinarias) */}
         <Grid size={{ xs: 12, lg: 4 }}>
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
             <CardContent sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -202,7 +218,6 @@ export default function Dashboard() {
 
       {/* --- FILA 3: NUEVOS GRÁFICOS Y TAREAS --- */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        {/* Gráfico de Barras (Demografía) */}
         <Grid size={{ xs: 12, lg: 6 }}>
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
             <CardContent>
@@ -222,7 +237,6 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Lista Interactiva de Tareas */}
         <Grid size={{ xs: 12, lg: 6 }}>
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%', bgcolor: theme.palette.background.default }}>
             <CardContent>
@@ -250,39 +264,55 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* --- FILA 4: TABLA Y ESTADO DE SERVIDOR --- */}
+      {/* --- FILA 4: TABLA CON DATOS REALES Y ESTADO DE SERVIDOR --- */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
-            <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-              <Typography variant="h6" fontWeight="bold">Transacciones en Vivo</Typography>
+            <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6" fontWeight="bold">Usuarios y Mascotas (BD PostgreSQL)</Typography>
+              <Chip label={cargandoDatos ? "Conectando..." : "En Vivo"} color={cargandoDatos ? "warning" : "success"} size="small" />
             </Box>
-            <TableContainer>
-              <Table size="medium">
-                <TableHead sx={{ bgcolor: theme.palette.background.default }}>
+            <TableContainer sx={{ maxHeight: 300 }}>
+              <Table size="medium" stickyHeader>
+                <TableHead>
                   <TableRow>
-                    <TableCell fontWeight="bold">Usuario</TableCell>
-                    <TableCell fontWeight="bold">Acción</TableCell>
-                    <TableCell fontWeight="bold">Monto</TableCell>
-                    <TableCell fontWeight="bold">Estado</TableCell>
+                    <TableCell fontWeight="bold">Dueño</TableCell>
+                    <TableCell fontWeight="bold">Correo</TableCell>
+                    <TableCell fontWeight="bold">Mascota Registrada</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {actividadReciente.map((row) => (
-                    <TableRow key={row.id} hover>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar sx={{ width: 32, height: 32, mr: 1.5, bgcolor: theme.palette.primary.light }}>{row.usuario.charAt(0)}</Avatar>
-                          <Typography variant="body2" fontWeight="bold">{row.usuario}</Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>{row.accion}</TableCell>
-                      <TableCell fontWeight="bold">{row.monto}</TableCell>
-                      <TableCell>
-                        <Chip label={row.estado} size="small" color={row.estado === 'Completado' ? 'success' : row.estado === 'Pendiente' ? 'warning' : 'default'} />
+                  {cargandoDatos ? (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
+                        <LinearProgress />
+                        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>Cargando datos desde Python...</Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : usuariosReales.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                        No hay usuarios registrados en la base de datos aún.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    usuariosReales.map((user) => (
+                      <TableRow key={user.id} hover>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar sx={{ width: 32, height: 32, mr: 1.5, bgcolor: theme.palette.primary.light }}>
+                              {user.nombre_completo.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <Typography variant="body2" fontWeight="bold">{user.nombre_completo}</Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>{user.correo}</TableCell>
+                        <TableCell>
+                          <Chip label={user.nombre_mascota} size="small" color="primary" variant="outlined" icon={<InfoOutlinedIcon fontSize="small"/>} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>

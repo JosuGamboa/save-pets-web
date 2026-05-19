@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom'; // Importantes para navegar
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { 
   Box, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, 
   ListItemButton, ListItemIcon, ListItemText, Tabs, Tab, Collapse, useTheme
@@ -17,13 +17,14 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import HomeIcon from '@mui/icons-material/Home';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 const drawerWidth = 240;
 
 export default function AdminLayout({ toggleTheme, currentMode }) {
   const theme = useTheme(); 
   const navigate = useNavigate();
-  const location = useLocation(); // Nos dice en qué URL estamos
+  const location = useLocation();
 
   const [openSidebar, setOpenSidebar] = useState(true);
   const [openUsersMenu, setOpenUsersMenu] = useState(false);
@@ -44,13 +45,18 @@ export default function AdminLayout({ toggleTheme, currentMode }) {
       if (currentPath === '/dashboard') label = 'Dashboard';
       if (currentPath === '/plan-free') label = 'Plan Free';
       if (currentPath === '/plan-premium') label = 'Plan Premium';
+      if (currentPath === '/negocios') label = 'Centros Asociados';
+      if (currentPath === '/productos') label = 'Tienda y Pedidos'; // <-- ACTUALIZADO EL NOMBRE
 
       setTabs(prev => [...prev, { path: currentPath, label }]);
     }
-  }, [location.pathname]); // Se ejecuta cuando cambia la URL
+  }, [location.pathname]);
 
   // Funciones de navegación
-  const handleUsersClick = () => setOpenSidebar(true) || setOpenUsersMenu(!openUsersMenu);
+  const handleUsersClick = () => {
+    setOpenSidebar(true);
+    setOpenUsersMenu(!openUsersMenu);
+  };
   
   // Cuando haces clic en una pestaña de arriba
   const handleTabChange = (event, newPath) => {
@@ -134,6 +140,7 @@ export default function AdminLayout({ toggleTheme, currentMode }) {
                 </ListItemButton>
               </List>
             </Collapse>
+
             {/* BOTÓN CENTROS ASOCIADOS */}
             <ListItem disablePadding>
               <ListItemButton onClick={() => navigate('/negocios')} selected={location.pathname === '/negocios'}>
@@ -141,6 +148,15 @@ export default function AdminLayout({ toggleTheme, currentMode }) {
                 <ListItemText primary="Centros Asociados" />
               </ListItemButton>
             </ListItem>
+
+            {/* BOTÓN GESTIÓN DE TIENDA Y PEDIDOS */}
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/productos')} selected={location.pathname === '/productos'}>
+                <ListItemIcon><LocalOfferIcon color="primary" /></ListItemIcon>
+                <ListItemText primary="Tienda y Pedidos" /> {/* <-- ACTUALIZADO EL TEXTO DEL MENÚ */}
+              </ListItemButton>
+            </ListItem>
+            
           </List>
         </Box>
       </Drawer>
@@ -167,7 +183,7 @@ export default function AdminLayout({ toggleTheme, currentMode }) {
         {/* BARRA DE PESTAÑAS DINÁMICAS */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: theme.palette.background.default, display: 'flex', px: 1 }}>
           <Tabs 
-            value={location.pathname} // La pestaña activa es la URL actual
+            value={location.pathname}
             onChange={handleTabChange} 
             variant="scrollable"
             scrollButtons="auto"
@@ -177,7 +193,7 @@ export default function AdminLayout({ toggleTheme, currentMode }) {
             {tabs.map((tab) => (
               <Tab 
                 key={tab.path} 
-                value={tab.path} // El valor de la pestaña es su ruta
+                value={tab.path} 
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     {tab.label}

@@ -76,7 +76,7 @@ export default function Landing({ toggleTheme, currentMode }) {
     setLoading(false);
   };
 
-  const enlaceDescarga = "https://savepets.com/descargar";
+  const enlaceDescarga = "https://drive.google.com/uc?export=download&id=1HQwMtU5jeguSnMfZ7_ivwgjsjgYxL7-N";
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'background.default', transition: 'all 0.3s ease' }}>
